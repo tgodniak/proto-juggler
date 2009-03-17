@@ -1,4 +1,4 @@
-var ProtoSlider = Class.create({
+var Juggler = Class.create({
 	initialize: function(element, options) {
 	    this.element = $(element);
 	    this.id      = (element.id == null || element.id == '') ? this.generateRandomId() : element.id;
@@ -7,9 +7,9 @@ var ProtoSlider = Class.create({
 	}
     });
 
-ProtoSlider.fn = ProtoSlider.prototype;
+Juggler.fn = Juggler.prototype;
 
-ProtoSlider.fn.generateRandomId = function() {
+Juggler.fn.generateRandomId = function() {
     var chars = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
     var stringLength = 10;
     var randomString = '';
