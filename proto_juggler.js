@@ -93,3 +93,19 @@ Juggler.fn.nextItem = function() {
 	this.nextBtn.addClassName('inactive');
     }
 };
+
+Juggler.fn.prevItem = function() {
+    var pos = this.params.get('vertical') ? parseInt(this.juggler.getStyle('left')) : parseInt(this.juggler.getStyle('top'));
+    if(pos < 0) {
+	var scrollValue = (pos + this.moveSize > 0) ? (-pos) : this.moveSize;
+	var directions = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
+	new Effect.Move(this.juggler, {x: directions.first(), y: directions.last(),
+		    mode: 'relative',
+		    transition: Effect.Transitions.sinoidal,
+		    duration: 0.5});
+	this.nextBtn.removeClassName('inactive');
+    }
+    if(pos + this.moveSize >= 0){
+	this.prevBtn.addClassName('inactive');
+    }
+};
