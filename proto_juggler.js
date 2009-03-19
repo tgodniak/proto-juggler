@@ -8,7 +8,8 @@ var Juggler = Class.create({
 		vertical:    true,
 		duration:    0.5,
 		delay:       3.0,
-		autoMove:    false
+		autoMove:    false,
+		autoRewind:  true
 	    }),
 	initialize: function(element, options) {
 	    this.container = $(element);
@@ -103,6 +104,12 @@ Juggler.fn.animate = function(directions) {
 				    duration: this.params.get('duration')});
 };
 
+Juggler.fn.rewind = function() {
+    var scrollValue = this.jugglerSize - this.moveSize
+    var directions  = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
+    this.animate(directions);
+};
+
 Juggler.fn.nextItem = function() {
     var pos = this.currentPosition();
     if(pos > -this.maxToMove){
@@ -111,6 +118,8 @@ Juggler.fn.nextItem = function() {
 	this.animate(directions);
 	this.prevBtn.removeClassName('inactive');
 	this.autoMove(this.params.get('duration'));
+    } else {
+	if(this.params.get('autoRewind')) { this.rewind(); }
     }
     if(pos - this.moveSize <= -this.maxToMove) { this.nextBtn.addClassName('inactive'); }
 };
