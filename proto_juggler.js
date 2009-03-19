@@ -94,13 +94,16 @@ Juggler.fn.addHandlers = function() {
 Juggler.fn.createHandlers = function() {
     this.prevBtn = $(this.params.get('prevId'));
     this.nextBtn = $(this.params.get('nextId'));
+    var wrapper = new Element('div', {'id':'juggler_wrapper'});
+    $(this.container.parentNode).insert(wrapper);
+    wrapper.insert(this.container);
     if(!this.prevBtn) {
 	this.prevBtn = new Element('a', {'id':'prev_btn','href':'#'}).update('<< Prev ');
-	this.container.parentNode.appendChild(this.prevBtn);
+	wrapper.insert(this.prevBtn);
     }
     if(!this.nextBtn) {
 	this.nextBtn = new Element('a', {'id':'next_btn','href':'#'}).update(' Next >>');
-	this.container.parentNode.appendChild(this.nextBtn);
+	wrapper.insert(this.nextBtn);
     }
     this.addHandlers();
 };
