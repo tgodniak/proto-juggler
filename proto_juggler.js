@@ -6,7 +6,9 @@ var Juggler = Class.create({
 		itemsToMove: 1,
 		itemsToShow: 1,
 		vertical:    true,
-		duration:    0.5
+		duration:    0.5,
+		delay:       3.0,
+		autoMove:    false
 	    }),
 	initialize: function(element, options) {
 	    this.container = $(element);
@@ -51,6 +53,16 @@ Juggler.fn.init = function() {
     this.jugglerSize = this.params.get('itemSize')*this.params.get('itemsCount');
     this.maxToMove   = this.jugglerSize - this.moveSize;
     this.createHandlers();
+    this.autoMove(0);
+};
+
+Juggler.fn.autoMove = function(delay) {
+    var d = (this.params.get('delay') + delay) * 1000
+    if(this.params.get('autoMove')) {
+	setTimeout(function() {
+		this.nextItem();
+	    }.bind(this), d);
+    }
 };
 
 Juggler.fn.addHandlers = function() {
@@ -95,24 +107,21 @@ Juggler.fn.nextItem = function() {
     var pos = this.currentPosition();
     if(pos > -this.maxToMove){
 	var scrollValue = (this.maxToMove + pos < this.moveSize) ? (this.maxToMove + pos) : this.moveSize;
-	var directions = this.params.get('vertical') ? [-scrollValue, 0] : [0, -scrollValue];
+	var directions  = this.params.get('vertical') ? [-scrollValue, 0] : [0, -scrollValue];
 	this.animate(directions);
 	this.prevBtn.removeClassName('inactive');
+	this.autoMove(this.params.get('duration'));
     }
-    if(pos - this.moveSize <= -this.maxToMove) {
-	this.nextBtn.addClassName('inactive');
-    }
+    if(pos - this.moveSize <= -this.maxToMove) { this.nextBtn.addClassName('inactive'); }
 };
 
 Juggler.fn.prevItem = function() {
     var pos = this.currentPosition();
     if(pos < 0) {
 	var scrollValue = (pos + this.moveSize > 0) ? (-pos) : this.moveSize;
-	var directions = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
+	var directions  = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
 	this.animate(directions);
 	this.nextBtn.removeClassName('inactive');
     }
-    if(pos + this.moveSize >= 0){
-	this.prevBtn.addClassName('inactive');
-    }
+    if(pos + this.moveSize >= 0) { this.prevBtn.addClassName('inactive'); }
 };
