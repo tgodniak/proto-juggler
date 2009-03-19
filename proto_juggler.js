@@ -5,7 +5,8 @@ var Juggler = Class.create({
 		nextId:      'next_btn',
 		itemsToMove: 1,
 		itemsToShow: 1,
-		vertical:    true
+		vertical:    true,
+		duration:    0.5
 	    }),
 	initialize: function(element, options) {
 	    this.container = $(element);
@@ -78,15 +79,24 @@ Juggler.fn.createHandlers = function() {
     this.addHandlers();
 };
 
+Juggler.fn.currentPosition = function() {
+    return this.params.get('vertical') ? parseInt(this.juggler.getStyle('left')) : parseInt(this.juggler.getStyle('top'));
+};
+
+Juggler.fn.animate = function(directions) {
+    new Effect.Move(this.juggler, { x: directions.first(),
+				    y: directions.last(),
+				    mode: 'relative',
+				    transition: Effect.Transitions.sinoidal,
+				    duration: this.params.get('duration')});
+};
+
 Juggler.fn.nextItem = function() {
-    var pos = this.params.get('vertical') ? parseInt(this.juggler.getStyle('left')) : parseInt(this.juggler.getStyle('top'));
+    var pos = this.currentPosition();
     if(pos > -this.maxToMove){
 	var scrollValue = (this.maxToMove + pos < this.moveSize) ? (this.maxToMove + pos) : this.moveSize;
 	var directions = this.params.get('vertical') ? [-scrollValue, 0] : [0, -scrollValue];
-	new Effect.Move(this.juggler, {x: directions.first(), y: directions.last(),
-		    mode: 'relative',
-		    transition: Effect.Transitions.sinoidal,
-		    duration: 0.5});
+	this.animate(directions);
 	this.prevBtn.removeClassName('inactive');
     }
     if(pos - this.moveSize <= -this.maxToMove) {
@@ -95,14 +105,11 @@ Juggler.fn.nextItem = function() {
 };
 
 Juggler.fn.prevItem = function() {
-    var pos = this.params.get('vertical') ? parseInt(this.juggler.getStyle('left')) : parseInt(this.juggler.getStyle('top'));
+    var pos = this.currentPosition();
     if(pos < 0) {
 	var scrollValue = (pos + this.moveSize > 0) ? (-pos) : this.moveSize;
 	var directions = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
-	new Effect.Move(this.juggler, {x: directions.first(), y: directions.last(),
-		    mode: 'relative',
-		    transition: Effect.Transitions.sinoidal,
-		    duration: 0.5});
+	this.animate(directions);
 	this.nextBtn.removeClassName('inactive');
     }
     if(pos + this.moveSize >= 0){
