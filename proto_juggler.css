@@ -18,3 +18,6 @@
     margin:2px;
     border:solid 1px #000;
 }
+.inactive {
+    color: #CCC;
+}

@@ -9,7 +9,7 @@ var Juggler = Class.create({
 		duration:    0.5,
 		delay:       3.0,
 		autoMove:    false,
-		autoRewind:  true
+		autoRewind:  false
 	    }),
 	initialize: function(element, options) {
 	    this.container = $(element);
@@ -18,7 +18,7 @@ var Juggler = Class.create({
 	    this.params  = this.defaults.merge(options);
 	    Object.extend(this, this.params);
 	    this.init();
-	},
+	}
     });
 
 Juggler.fn = Juggler.prototype;
@@ -34,19 +34,32 @@ Juggler.fn.generateRandomId = function() {
     return randomString;
 };
 
+Juggler.fn.getItemSize = function() {
+    var e = this.items.first().childElements().first();
+    var size = 0;
+    if(this.params.get('vertical')) {
+	size += e.getWidth();
+	size += parseInt(e.getStyles().marginLeft);
+	size += parseInt(e.getStyles().marginRight);
+    } else {
+	size += e.getHeight();
+	size += parseInt(e.getStyles().marginTop) || parseInt(e.getStyles().marginBottom);
+    }
+    this.params.set('itemSize', size);
+};
+
 Juggler.fn.init = function() {
     this.juggler = $(this.container.down('ul'));
     this.juggler.setStyle('position: relative; left: 0px; top: 0px; overflow: hidden;');
     this.items = this.juggler.childElements();
-    this.container.setStyle('overflow: hidden;');
+    this.container.setStyle('overflow: hidden; position: relative;');
     this.params.set('itemsCount', this.items.size());
+    this.getItemSize();
     if(this.params.get('vertical')) {
 	this.items.each(function(el) { el.setStyle('float:left;') });
-	this.params.set('itemSize', this.items.first().getWidth());
 	this.juggler.setStyle('width:' + (this.params.get('itemSize')*this.params.get('itemsCount')) + 'px;');
 	this.container.setStyle('width:' + (this.params.get('itemSize')*this.params.get('itemsToShow')) + 'px;');
     } else {
-	this.params.set('itemSize', this.items.first().getHeight());
 	this.juggler.setStyle('height:' + (this.params.get('itemSize')*this.params.get('itemsCount')) + 'px;');
 	this.container.setStyle('height:' + (this.params.get('itemSize')*this.params.get('itemsToShow')) + 'px;');
     }
@@ -83,11 +96,11 @@ Juggler.fn.createHandlers = function() {
     this.nextBtn = $(this.params.get('nextId'));
     if(!this.prevBtn) {
 	this.prevBtn = new Element('a', {'id':'prev_btn','href':'#'}).update('<< Prev ');
-	this.container.parentNode.insert(this.prevBtn);
+	this.container.parentNode.appendChild(this.prevBtn);
     }
     if(!this.nextBtn) {
 	this.nextBtn = new Element('a', {'id':'next_btn','href':'#'}).update(' Next >>');
-	this.container.parentNode.insert(this.nextBtn);
+	this.container.parentNode.appendChild(this.nextBtn);
     }
     this.addHandlers();
 };
@@ -107,7 +120,12 @@ Juggler.fn.animate = function(directions) {
 Juggler.fn.rewind = function() {
     var scrollValue = this.jugglerSize - this.moveSize
     var directions  = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
+
     this.animate(directions);
+    this.autoMove(this.params.get('duration'));
+
+    this.nextBtn.removeClassName('inactive');
+    this.prevBtn.addClassName('inactive');
 };
 
 Juggler.fn.nextItem = function() {
@@ -115,13 +133,15 @@ Juggler.fn.nextItem = function() {
     if(pos > -this.maxToMove){
 	var scrollValue = (this.maxToMove + pos < this.moveSize) ? (this.maxToMove + pos) : this.moveSize;
 	var directions  = this.params.get('vertical') ? [-scrollValue, 0] : [0, -scrollValue];
+
 	this.animate(directions);
-	this.prevBtn.removeClassName('inactive');
 	this.autoMove(this.params.get('duration'));
+
+	this.prevBtn.removeClassName('inactive');
+	if(pos - this.moveSize <= -this.maxToMove) { this.nextBtn.addClassName('inactive'); }
     } else {
 	if(this.params.get('autoRewind')) { this.rewind(); }
     }
-    if(pos - this.moveSize <= -this.maxToMove) { this.nextBtn.addClassName('inactive'); }
 };
 
 Juggler.fn.prevItem = function() {
@@ -129,7 +149,9 @@ Juggler.fn.prevItem = function() {
     if(pos < 0) {
 	var scrollValue = (pos + this.moveSize > 0) ? (-pos) : this.moveSize;
 	var directions  = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
+
 	this.animate(directions);
+	this.params.set('autoMove', false);
 	this.nextBtn.removeClassName('inactive');
     }
     if(pos + this.moveSize >= 0) { this.prevBtn.addClassName('inactive'); }
