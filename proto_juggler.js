@@ -47,8 +47,7 @@ Juggler.fn.init = function() {
 	this.container.setStyle('height:' + (this.params.get('itemSize')*this.params.get('itemsCount')) + 'px;');
 	this.juggler.setStyle('height:' + (this.params.get('itemSize')*this.params.get('itemsToShow')) + 'px;');
     }
-    this.prevBtn = $(this.params.get('prevId'));
-    this.nextBtn = $(this.params.get('nextId'));
+    this.createHandlers();
 };
 
 Juggler.fn.addHandlers = function() {
@@ -58,6 +57,21 @@ Juggler.fn.addHandlers = function() {
     } else {
 	this.prevBtn.onclick = function() {return false;};
 	this.nextBtn.onclick = function() {return false;};
-	this.nextBtn.addClassName('next-inactive');
+	this.nextBtn.addClassName('inactive');
     }
+    this.prevBtn.addClassName('inactive');
 };
+
+Juggler.fn.createHandlers = function() {
+    this.prevBtn = $(this.params.get('prevId'));
+    this.nextBtn = $(this.params.get('nextId'));
+    if(!this.prevBtn) {
+	this.prevBtn = new Element('a', {'id':'prevBtn','href':'#'}).update('<< Prev ');
+	this.container.insert(this.prevBtn);
+    }
+    if(!this.nextBtn) {
+	this.nextBtn = new Element('a', {'id':'nextBtn','href':'#'}).update(' Next >>');
+	this.container.insert(this.nextBtn);
+    }
+    this.addHandlers();
+}
