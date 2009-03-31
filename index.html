@@ -19,13 +19,20 @@
 	  <li><div>6</div></li>
 	  <li><div>7</div></li>
 	  <li><div>8</div></li>
+	  <li><div>9</div></li>
+	  <li><div>10</div></li>
+	  <li><div>11</div></li>
+	  <li><div>12</div></li>
+	  <li><div>13</div></li>
+	  <li><div>14</div></li>
+	  <li><div>15</div></li>
 	</ul>
       </div>
     </div>
 
     <script type="text/javascript">
       Event.observe(window, 'load', function(event) {
-        j = new Juggler($('juggler'), {itemsToMove:2,itemsToShow:3,vertical:true,autoRewind:false,autoMove:false});
+        j = new Juggler($('juggler'), {itemsInRow:3,itemsToMove:1,itemsToShow:3,horizontal:false,autoRewind:false,autoMove:false});
       });
     </script>
   </body>

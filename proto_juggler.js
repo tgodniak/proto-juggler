@@ -5,12 +5,13 @@ var Juggler = Class.create({
 		nextId:      'next_btn',
 		itemsToMove: 1,
 		itemsToShow: 1,
-		vertical:    true,
+		horizontal:    true,
 		duration:    0.5,
 		delay:       3.0,
 		autoMove:    false,
 		autoRewind:  false,
-		itemSize:    0
+		itemSize:    0,
+		itemsInRow:  1
 	    }),
 	initialize: function(element, options) {
 	    this.container = $(element);
@@ -40,17 +41,31 @@ Juggler.fn.getItemSize = function() {
     if(this.params.get('itemSize') != 0) {
 	size = this.params.get('itemSize');
     } else {
-	var e = this.items.first().childElements().first();
-	if(this.params.get('vertical')) {
-	    size += e.getWidth();
-	    size += parseInt(e.getStyles().marginLeft);
-	    size += parseInt(e.getStyles().marginRight);
+	if(this.params.get('horizontal')) {
+	    size = this.itemWidth();
 	} else {
-	    size += e.getHeight();
-	    size += parseInt(e.getStyles().marginTop) || parseInt(e.getStyles().marginBottom);
+	    size = this.itemHeight();
 	}
     }
     this.params.set('itemSize', size);
+};
+
+Juggler.fn.itemWidth = function() {
+    var e = this.items.first().childElements().first();
+    var width = 0;
+    width += e.getWidth();
+    width += parseInt(e.getStyles().marginLeft);
+    width += parseInt(e.getStyles().marginRight);
+    return width;
+};
+
+Juggler.fn.itemHeight = function() {
+    var e = this.items.first().childElements().first();
+    var height = 0;
+    height += e.getHeight();
+    height += parseInt(e.getStyles().marginTop);
+    height += parseInt(e.getStyles().marginBottom);
+    return height;
 };
 
 Juggler.fn.init = function() {
@@ -60,16 +75,17 @@ Juggler.fn.init = function() {
     this.container.setStyle('overflow: hidden; position: relative;');
     this.params.set('itemsCount', this.items.size());
     this.getItemSize();
-    if(this.params.get('vertical')) {
-	this.items.each(function(el) { el.setStyle('float:left;') });
+    this.items.each(function(el) { el.setStyle('float:left;') });
+    if(this.params.get('horizontal')) {
 	this.juggler.setStyle('width:' + (this.params.get('itemSize')*this.params.get('itemsCount')) + 'px;');
 	this.container.setStyle('width:' + (this.params.get('itemSize')*this.params.get('itemsToShow')) + 'px;');
     } else {
 	this.juggler.setStyle('height:' + (this.params.get('itemSize')*this.params.get('itemsCount')) + 'px;');
 	this.container.setStyle('height:' + (this.params.get('itemSize')*this.params.get('itemsToShow')) + 'px;');
+	this.container.setStyle('width:' + (this.itemWidth()*this.params.get('itemsInRow')) + 'px;');
     }
     this.moveSize    = this.params.get('itemSize')*this.params.get('itemsToMove');
-    this.jugglerSize = this.params.get('itemSize')*this.params.get('itemsCount');
+    this.jugglerSize = this.params.get('itemSize')*Math.ceil(this.params.get('itemsCount')/this.params.get('itemsInRow'))
     this.maxToMove   = this.jugglerSize - this.params.get('itemSize')*this.params.get('itemsToShow');
     this.createHandlers();
     this.autoMove(0);
@@ -114,7 +130,7 @@ Juggler.fn.createHandlers = function() {
 };
 
 Juggler.fn.currentPosition = function() {
-    return this.params.get('vertical') ? parseInt(this.juggler.getStyle('left')) : parseInt(this.juggler.getStyle('top'));
+    return this.params.get('horizontal') ? parseInt(this.juggler.getStyle('left')) : parseInt(this.juggler.getStyle('top'));
 };
 
 Juggler.fn.animate = function(directions) {
@@ -127,7 +143,7 @@ Juggler.fn.animate = function(directions) {
 
 Juggler.fn.rewind = function() {
     var scrollValue = -this.currentPosition();
-    var directions  = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
+    var directions  = this.params.get('horizontal') ? [scrollValue, 0] : [0, scrollValue];
 
     this.animate(directions);
     this.autoMove(this.params.get('duration'));
@@ -140,7 +156,7 @@ Juggler.fn.nextItem = function() {
     var pos = this.currentPosition();
     if(pos > -this.maxToMove){
 	var scrollValue = (this.maxToMove + pos < this.moveSize) ? (this.maxToMove + pos) : this.moveSize;
-	var directions  = this.params.get('vertical') ? [-scrollValue, 0] : [0, -scrollValue];
+	var directions  = this.params.get('horizontal') ? [-scrollValue, 0] : [0, -scrollValue];
 
 	this.animate(directions);
 	this.autoMove(this.params.get('duration'));
@@ -156,7 +172,7 @@ Juggler.fn.prevItem = function() {
     var pos = this.currentPosition();
     if(pos < 0) {
 	var scrollValue = (pos + this.moveSize > 0) ? (-pos) : this.moveSize;
-	var directions  = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
+	var directions  = this.params.get('horizontal') ? [scrollValue, 0] : [0, scrollValue];
 
 	this.animate(directions);
 	this.params.set('autoMove', false);
