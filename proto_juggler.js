@@ -9,7 +9,8 @@ var Juggler = Class.create({
 		duration:    0.5,
 		delay:       3.0,
 		autoMove:    false,
-		autoRewind:  false
+		autoRewind:  false,
+		itemSize:    0
 	    }),
 	initialize: function(element, options) {
 	    this.container = $(element);
@@ -35,15 +36,19 @@ Juggler.fn.generateRandomId = function() {
 };
 
 Juggler.fn.getItemSize = function() {
-    var e = this.items.first().childElements().first();
     var size = 0;
-    if(this.params.get('vertical')) {
-	size += e.getWidth();
-	size += parseInt(e.getStyles().marginLeft);
-	size += parseInt(e.getStyles().marginRight);
+    if(this.params.get('itemSize') != 0) {
+	size = this.params.get('itemSize');
     } else {
-	size += e.getHeight();
-	size += parseInt(e.getStyles().marginTop) || parseInt(e.getStyles().marginBottom);
+	var e = this.items.first().childElements().first();
+	if(this.params.get('vertical')) {
+	    size += e.getWidth();
+	    size += parseInt(e.getStyles().marginLeft);
+	    size += parseInt(e.getStyles().marginRight);
+	} else {
+	    size += e.getHeight();
+	    size += parseInt(e.getStyles().marginTop) || parseInt(e.getStyles().marginBottom);
+	}
     }
     this.params.set('itemSize', size);
 };
@@ -63,9 +68,9 @@ Juggler.fn.init = function() {
 	this.juggler.setStyle('height:' + (this.params.get('itemSize')*this.params.get('itemsCount')) + 'px;');
 	this.container.setStyle('height:' + (this.params.get('itemSize')*this.params.get('itemsToShow')) + 'px;');
     }
-    this.moveSize    = this.params.get('itemSize')*this.params.get('itemsToShow');
+    this.moveSize    = this.params.get('itemSize')*this.params.get('itemsToMove');
     this.jugglerSize = this.params.get('itemSize')*this.params.get('itemsCount');
-    this.maxToMove   = this.jugglerSize - this.moveSize;
+    this.maxToMove   = this.jugglerSize - this.moveSize*this.params.get('itemsToShow');
     this.createHandlers();
     this.autoMove(0);
 };
@@ -86,9 +91,9 @@ Juggler.fn.addHandlers = function() {
     } else {
 	this.prevBtn.onclick = function() {return false;};
 	this.nextBtn.onclick = function() {return false;};
-	this.nextBtn.addClassName('inactive');
+	this.nextBtn.addClassName('next-inactive');
     }
-    this.prevBtn.addClassName('inactive');
+    this.prevBtn.addClassName('prev-inactive');
 };
 
 Juggler.fn.createHandlers = function() {
@@ -127,8 +132,8 @@ Juggler.fn.rewind = function() {
     this.animate(directions);
     this.autoMove(this.params.get('duration'));
 
-    this.nextBtn.removeClassName('inactive');
-    this.prevBtn.addClassName('inactive');
+    this.nextBtn.removeClassName('next-inactive');
+    this.prevBtn.addClassName('prev-inactive');
 };
 
 Juggler.fn.nextItem = function() {
@@ -140,8 +145,8 @@ Juggler.fn.nextItem = function() {
 	this.animate(directions);
 	this.autoMove(this.params.get('duration'));
 
-	this.prevBtn.removeClassName('inactive');
-	if(pos - this.moveSize <= -this.maxToMove) { this.nextBtn.addClassName('inactive'); }
+	this.prevBtn.removeClassName('prev-inactive');
+	if(pos - this.moveSize <= -this.maxToMove) { this.nextBtn.addClassName('next-inactive'); }
     } else {
 	if(this.params.get('autoRewind')) { this.rewind(); }
     }
@@ -155,7 +160,7 @@ Juggler.fn.prevItem = function() {
 
 	this.animate(directions);
 	this.params.set('autoMove', false);
-	this.nextBtn.removeClassName('inactive');
+	this.nextBtn.removeClassName('next-inactive');
     }
-    if(pos + this.moveSize >= 0) { this.prevBtn.addClassName('inactive'); }
+    if(pos + this.moveSize >= 0) { this.prevBtn.addClassName('prev-inactive'); }
 };
