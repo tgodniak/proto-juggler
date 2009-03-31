@@ -126,7 +126,7 @@ Juggler.fn.animate = function(directions) {
 };
 
 Juggler.fn.rewind = function() {
-    var scrollValue = this.jugglerSize - this.moveSize
+    var scrollValue = -this.currentPosition();
     var directions  = this.params.get('vertical') ? [scrollValue, 0] : [0, scrollValue];
 
     this.animate(directions);
