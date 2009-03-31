@@ -70,7 +70,7 @@ Juggler.fn.init = function() {
     }
     this.moveSize    = this.params.get('itemSize')*this.params.get('itemsToMove');
     this.jugglerSize = this.params.get('itemSize')*this.params.get('itemsCount');
-    this.maxToMove   = this.jugglerSize - this.moveSize*this.params.get('itemsToShow');
+    this.maxToMove   = this.jugglerSize - this.params.get('itemSize')*this.params.get('itemsToShow');
     this.createHandlers();
     this.autoMove(0);
 };
